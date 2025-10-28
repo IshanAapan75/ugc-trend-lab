@@ -1,14 +1,40 @@
-import { Link, useLocation } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Sparkles, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const Navigation = () => {
   const location = useLocation();
-  
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const navItems = [
     { name: "Home", path: "/" },
     { name: "UGC Generator", path: "/ugc-generator" },
     { name: "Content Intelligence", path: "/content-intelligence" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Logged out successfully',
+      });
+      navigate('/login');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to logout',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -22,7 +48,7 @@ const Navigation = () => {
               AI Marketing Pro
             </span>
           </Link>
-          
+
           <div className="hidden md:flex items-center gap-8">
             {navItems.map((item) => (
               <Link
@@ -37,6 +63,17 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            {user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            )}
           </div>
         </div>
       </div>
