@@ -14,6 +14,8 @@ const UGCGenerator = () => {
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,10 +48,13 @@ const UGCGenerator = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        setPreviewUrl(data.previewUrl);
+        setVideoUrl(data.videoUrl);
         setVideoGenerated(true);
         toast({
           title: "Video Generated!",
-          description: "Your UGC video is ready to download",
+          description: "Your UGC video is ready to view",
         });
       } else {
         toast({
@@ -186,19 +191,39 @@ const UGCGenerator = () => {
                 <CardDescription>Preview and download your generated UGC video</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="aspect-video bg-secondary rounded-lg flex items-center justify-center">
-                  <Video className="w-16 h-16 text-muted-foreground" />
-                  {/* Video player would go here */}
-                </div>
+                {previewUrl && (
+                  <div className="aspect-video bg-secondary rounded-lg overflow-hidden">
+                    <iframe 
+                      src={previewUrl}
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      allow="autoplay"
+                      className="w-full h-full"
+                    />
+                  </div>
+                )}
 
                 <div className="flex gap-4">
-                  <Button variant="hero" className="flex-1">
-                    <Download className="w-5 h-5" />
-                    Download Video
+                  <Button 
+                    variant="hero" 
+                    className="flex-1"
+                    asChild
+                  >
+                    <a href={videoUrl} target="_blank" rel="noopener noreferrer">
+                      <Share2 className="w-5 h-5" />
+                      Open in Google Drive
+                    </a>
                   </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Share2 className="w-5 h-5" />
-                    Share
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    asChild
+                  >
+                    <a href={videoUrl} download>
+                      <Download className="w-5 h-5" />
+                      Download Video
+                    </a>
                   </Button>
                 </div>
               </CardContent>
