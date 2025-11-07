@@ -34,26 +34,39 @@ const UGCGenerator = () => {
 
     setIsGenerating(true);
     
-    // TODO: Replace with actual n8n API call
-    // const formData = new FormData();
-    // formData.append('file', file);
-    // formData.append('productName', productName);
-    // formData.append('description', description);
-    // 
-    // await fetch('YOUR_N8N_WEBHOOK_URL', {
-    //   method: 'POST',
-    //   body: formData
-    // });
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsGenerating(false);
-      setVideoGenerated(true);
-      toast({
-        title: "Video Generated!",
-        description: "Your UGC video is ready to download",
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('productName', productName);
+      formData.append('description', description);
+      
+      const response = await fetch('https://n8n.welz.in/webhook-test/ugc-upload', {
+        method: 'POST',
+        body: formData
       });
-    }, 3000);
+
+      if (response.ok) {
+        setVideoGenerated(true);
+        toast({
+          title: "Video Generated!",
+          description: "Your UGC video is ready to download",
+        });
+      } else {
+        toast({
+          title: "Generation Failed",
+          description: "There was an error generating your video. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to connect to the server. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -130,7 +143,7 @@ const UGCGenerator = () => {
 
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating}
+                disabled={isGenerating || !file || !productName || !description}
                 className="w-full"
                 variant="hero"
                 size="lg"
