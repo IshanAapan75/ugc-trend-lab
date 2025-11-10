@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,32 @@ const UGCGenerator = () => {
   const [previewUrl, setPreviewUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchLatestVideo = async () => {
+      try {
+        const res = await fetch("/api/ugc-generator");
+        const data = await res.json();
+        if (data.success && data.latestVideoLink) {
+          setVideoUrl(data.latestVideoLink);
+          setVideoGenerated(true);
+          toast({
+            title: "🎬 New Video Ready!",
+            description: "Your latest UGC video is now available.",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching latest video:", err);
+      }
+    };
+
+    // Initial fetch
+    fetchLatestVideo();
+
+    // 🕒 Auto-check every 15 seconds
+    const interval = setInterval(fetchLatestVideo, 15000);
+    return () => clearInterval(interval);
+  }, [toast]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -48,13 +74,10 @@ const UGCGenerator = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setPreviewUrl(data.previewUrl);
-        setVideoUrl(data.videoUrl);
-        setVideoGenerated(true);
+        // 🆕 Instead of waiting for final link, we rely on background n8n + API update
         toast({
-          title: "Video Generated!",
-          description: "Your UGC video is ready to view",
+          title: "Processing Started",
+          description: "Your video is being generated. It will appear automatically when ready.",
         });
       } else {
         toast({
@@ -191,10 +214,10 @@ const UGCGenerator = () => {
                 <CardDescription>Preview and download your generated UGC video</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {previewUrl && (
+                {videoUrl && (
                   <div className="aspect-video bg-secondary rounded-lg overflow-hidden">
                     <iframe 
-                      src={previewUrl}
+                      src={videoUrl}
                       width="100%"
                       height="100%"
                       frameBorder="0"
