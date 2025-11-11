@@ -18,7 +18,16 @@ const UGCGenerator = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const { toast } = useToast();
 
+  // 🧠 Reset everything when page first loads (to avoid old video showing)
   useEffect(() => {
+    setVideoGenerated(false);
+    setVideoUrl("");
+  }, []);
+
+  // 🧠 Poll API only when generating
+  useEffect(() => {
+    if (!isGenerating) return; // only poll while generating
+
     const fetchLatestVideo = async () => {
       try {
         const res = await fetch("/api/ugc-generator");
@@ -26,6 +35,7 @@ const UGCGenerator = () => {
         if (data.success && data.latestVideoLink) {
           setVideoUrl(data.latestVideoLink);
           setVideoGenerated(true);
+          setIsGenerating(false); // stop generating spinner
           toast({
             title: "🎬 New Video Ready!",
             description: "Your latest UGC video is now available.",
@@ -36,13 +46,10 @@ const UGCGenerator = () => {
       }
     };
 
-    // Initial fetch
-    fetchLatestVideo();
-
-    // 🕒 Auto-check every 15 seconds
+    // Start checking every 15s
     const interval = setInterval(fetchLatestVideo, 15000);
     return () => clearInterval(interval);
-  }, [toast]);
+  }, [isGenerating, toast]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -60,6 +67,10 @@ const UGCGenerator = () => {
       return;
     }
 
+    // 🧠 Reset previous video when user starts a new one
+    setVideoGenerated(false);
+    setVideoUrl("");
+
     setIsGenerating(true);
     
     try {
@@ -74,7 +85,6 @@ const UGCGenerator = () => {
       });
 
       if (response.ok) {
-        // 🆕 Instead of waiting for final link, we rely on background n8n + API update
         toast({
           title: "Processing Started",
           description: "Your video is being generated. It will appear automatically when ready.",
@@ -85,6 +95,7 @@ const UGCGenerator = () => {
           description: "There was an error generating your video. Please try again.",
           variant: "destructive",
         });
+        setIsGenerating(false);
       }
     } catch (error) {
       toast({
@@ -92,7 +103,6 @@ const UGCGenerator = () => {
         description: "Failed to connect to the server. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsGenerating(false);
     }
   };
@@ -115,6 +125,7 @@ const UGCGenerator = () => {
             </p>
           </div>
 
+          {/* Upload & Form */}
           <Card className="shadow-medium border-2 animate-scale-in">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -191,6 +202,7 @@ const UGCGenerator = () => {
             </CardContent>
           </Card>
 
+          {/* Loader */}
           {isGenerating && (
             <Card className="mt-8 shadow-soft animate-fade-in">
               <CardContent className="py-12">
@@ -207,6 +219,7 @@ const UGCGenerator = () => {
             </Card>
           )}
 
+          {/* Final video section */}
           {videoGenerated && !isGenerating && (
             <Card className="mt-8 shadow-medium border-2 border-primary/20 animate-scale-in">
               <CardHeader>
@@ -228,21 +241,13 @@ const UGCGenerator = () => {
                 )}
 
                 <div className="flex gap-4">
-                  <Button 
-                    variant="hero" 
-                    className="flex-1"
-                    asChild
-                  >
+                  <Button variant="hero" className="flex-1" asChild>
                     <a href={videoUrl} target="_blank" rel="noopener noreferrer">
                       <Share2 className="w-5 h-5" />
                       Open in Google Drive
                     </a>
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    asChild
-                  >
+                  <Button variant="outline" className="flex-1" asChild>
                     <a href={videoUrl} download>
                       <Download className="w-5 h-5" />
                       Download Video
