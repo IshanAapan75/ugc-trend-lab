@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Instagram, Linkedin, Facebook, Twitter, FileText, ArrowLeft, Copy, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 type Platform = {
   id: string;
@@ -232,16 +233,12 @@ const ContentIntelligence = () => {
                     <div className="flex items-center justify-center py-20">
                       <Loader2 className="w-12 h-12 text-primary animate-spin" />
                     </div>
-                  ) : generatedContent ? (
-                    <div className="prose max-w-none">
-                      <div className="whitespace-pre-wrap text-sm text-foreground bg-muted/30 rounded-lg p-4 min-h-[400px]">
-                        {generatedContent}
-                      </div>
-                    </div>
                   ) : (
-                    <div className="flex items-center justify-center py-20 text-muted-foreground">
-                      <p>Your generated content will appear here</p>
-                    </div>
+                    <RichTextEditor 
+                      content={generatedContent || "<p>Start generating content to see it here...</p>"}
+                      onChange={setGeneratedContent}
+                      editable={true}
+                    />
                   )}
                 </CardContent>
               </Card>
