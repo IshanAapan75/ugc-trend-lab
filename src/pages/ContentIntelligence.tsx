@@ -3,97 +3,254 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { TrendingUp, Sparkles, Copy, Edit, Loader2, Mail } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Instagram, Linkedin, Facebook, Twitter, FileText, ArrowLeft, Copy, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 
+type Platform = {
+  id: string;
+  name: string;
+  icon: React.ElementType;
+  description: string;
+  color: string;
+  fields: {
+    topic: string;
+    outline: string;
+  };
+};
+
+const platforms: Platform[] = [
+  {
+    id: "linkedin",
+    name: "LinkedIn Post Generator",
+    icon: Linkedin,
+    description: "An AI tool that serves as your personal LinkedIn post writer, generating catchy and viral-worthy post chosen language.",
+    color: "text-blue-600",
+    fields: {
+      topic: "Enter LinkedIn post topic",
+      outline: "Enter LinkedIn post outline here",
+    },
+  },
+  {
+    id: "instagram",
+    name: "Instagram Post Generator",
+    icon: Instagram,
+    description: "An AI tool that serves as your personal Instagram post writer, generating catchy and viral-worthy post chosen language.",
+    color: "text-pink-600",
+    fields: {
+      topic: "Enter Instagram post topic",
+      outline: "Enter Instagram post outline here",
+    },
+  },
+  {
+    id: "facebook",
+    name: "Facebook Post Generator",
+    icon: Facebook,
+    description: "An AI tool that serves as your personal Facebook post writer, generating catchy and viral-worthy post chosen language.",
+    color: "text-blue-500",
+    fields: {
+      topic: "Enter Facebook post topic",
+      outline: "Enter Facebook post outline here",
+    },
+  },
+  {
+    id: "twitter",
+    name: "Twitter Post Generator",
+    icon: Twitter,
+    description: "An AI tool that serves as your personal Twitter post writer, generating catchy and viral-worthy post chosen language.",
+    color: "text-sky-500",
+    fields: {
+      topic: "Enter Twitter post topic",
+      outline: "Enter Twitter post outline here",
+    },
+  },
+  {
+    id: "blog",
+    name: "Blog Post Generator",
+    icon: FileText,
+    description: "An AI tool that serves as your personal blog post writer, generating catchy and viral-worthy post chosen language.",
+    color: "text-purple-600",
+    fields: {
+      topic: "Enter blog post topic",
+      outline: "Enter blog post outline here",
+    },
+  },
+];
+
 const ContentIntelligence = () => {
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
+  const [topic, setTopic] = useState("");
+  const [outline, setOutline] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [contentGenerated, setContentGenerated] = useState(false);
-  const [keyword, setKeyword] = useState("");
-  const [platform, setPlatform] = useState("");
-  const [emailMe, setEmailMe] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState("");
   const { toast } = useToast();
 
-  const recentTrends = [
-    "AI Marketing Tools",
-    "Sustainable Fashion",
-    "Remote Work Tips",
-    "Healthy Meal Prep",
-  ];
-
-  const generatedPosts = [
-    {
-      platform: "LinkedIn",
-      content: "🚀 Excited to share our latest insights on AI-powered marketing strategies that are transforming the industry...",
-    },
-    {
-      platform: "Instagram",
-      content: "✨ Game-changing tools that every marketer needs in 2025! Swipe to see our top picks 👉",
-    },
-  ];
-
-  const handleAutoTrend = async () => {
-    setIsGenerating(true);
-    
-    // TODO: Replace with actual n8n API call for auto-trend
-    // await fetch('YOUR_N8N_WEBHOOK_URL', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ type: 'auto-trend' })
-    // });
-
-    setTimeout(() => {
-      setIsGenerating(false);
-      setContentGenerated(true);
-      toast({
-        title: "Trending Topics Found!",
-        description: "We've identified the top 2 trending topics for you",
-      });
-    }, 2000);
+  const handleCardClick = (platform: Platform) => {
+    setSelectedPlatform(platform);
+    setTopic("");
+    setOutline("");
+    setGeneratedContent("");
   };
 
-  const handleDeepResearch = async () => {
-    if (!keyword || !platform) {
+  const handleBack = () => {
+    setSelectedPlatform(null);
+    setTopic("");
+    setOutline("");
+    setGeneratedContent("");
+  };
+
+  const handleGenerate = async () => {
+    if (!topic || !outline) {
       toast({
         title: "Missing Information",
-        description: "Please enter a keyword and select a platform",
+        description: "Please fill in both topic and outline fields",
         variant: "destructive",
       });
       return;
     }
 
     setIsGenerating(true);
-    
-    // TODO: Replace with actual n8n API call for deep research
-    // await fetch('YOUR_N8N_WEBHOOK_URL', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ 
-    //     type: 'deep-research',
-    //     keyword,
-    //     platform,
-    //     emailMe
-    //   })
-    // });
 
+    // TODO: Replace with actual API call
     setTimeout(() => {
+      setGeneratedContent(`This is a sample ${selectedPlatform?.name.toLowerCase()} about "${topic}".\n\n${outline}\n\nThis is AI-generated content that would appear here after processing your request.`);
       setIsGenerating(false);
-      setContentGenerated(true);
       toast({
         title: "Content Generated!",
-        description: emailMe ? "Content generated and sent to your email" : "Your AI-powered content is ready",
+        description: "Your AI-powered content is ready",
       });
     }, 2000);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedContent);
     toast({
       title: "Copied!",
       description: "Content copied to clipboard",
     });
   };
+
+  if (selectedPlatform) {
+    const Icon = selectedPlatform.icon;
+    
+    return (
+      <div className="min-h-screen bg-gradient-hero">
+        <Navigation />
+        
+        <div className="pt-32 pb-20 px-6">
+          <div className="container mx-auto max-w-7xl">
+            <Button
+              onClick={handleBack}
+              variant="default"
+              className="mb-6"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Left Panel - Input Form */}
+              <Card className="shadow-medium">
+                <CardHeader>
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className={`w-16 h-16 rounded-xl bg-background flex items-center justify-center ${selectedPlatform.color}`}>
+                      <Icon className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <CardTitle className={selectedPlatform.color}>
+                        {selectedPlatform.name}
+                      </CardTitle>
+                    </div>
+                  </div>
+                  <CardDescription className="text-base">
+                    {selectedPlatform.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="topic">{selectedPlatform.fields.topic}</Label>
+                    <Input
+                      id="topic"
+                      placeholder={selectedPlatform.fields.topic}
+                      value={topic}
+                      onChange={(e) => setTopic(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="outline">{selectedPlatform.fields.outline}</Label>
+                    <Textarea
+                      id="outline"
+                      placeholder={selectedPlatform.fields.outline}
+                      value={outline}
+                      onChange={(e) => setOutline(e.target.value)}
+                      rows={6}
+                      className="resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground">Note: Max 2000 Words</p>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    className="w-full"
+                    variant="hero"
+                    size="lg"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate Content"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Right Panel - Result */}
+              <Card className="shadow-medium">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Your Result</CardTitle>
+                    {generatedContent && (
+                      <Button
+                        onClick={copyToClipboard}
+                        variant="default"
+                        size="sm"
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isGenerating ? (
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    </div>
+                  ) : generatedContent ? (
+                    <div className="prose max-w-none">
+                      <div className="whitespace-pre-wrap text-sm text-foreground bg-muted/30 rounded-lg p-4 min-h-[400px]">
+                        {generatedContent}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center py-20 text-muted-foreground">
+                      <p>Your generated content will appear here</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -106,196 +263,35 @@ const ContentIntelligence = () => {
               <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
                 AI-Powered
               </span>{" "}
-              Social Media Intelligence
+              Social Media Content Generator
             </h1>
             <p className="text-xl text-muted-foreground">
-              Discover trending topics and generate viral content for any platform
+              Generate engaging content for any platform with AI
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* Auto Trend Content */}
-            <Card className="shadow-soft hover:shadow-medium transition-all animate-fade-in">
-              <CardHeader>
-                <div className="w-14 h-14 bg-gradient-primary rounded-xl flex items-center justify-center mb-4">
-                  <TrendingUp className="w-7 h-7 text-white" />
-                </div>
-                <CardTitle>Auto Trend Content</CardTitle>
-                <CardDescription>
-                  Automatically fetch the top 2 trending topics and generate content
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  onClick={handleAutoTrend}
-                  disabled={isGenerating}
-                  variant="hero"
-                  className="w-full"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {platforms.map((platform) => {
+              const Icon = platform.icon;
+              return (
+                <Card
+                  key={platform.id}
+                  className="cursor-pointer hover:shadow-lg transition-all hover:scale-105 hover:border-primary/50"
+                  onClick={() => handleCardClick(platform)}
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Fetching Trends...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5" />
-                      Fetch Top Trending Topics
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Deep Research Content */}
-            <Card className="shadow-soft hover:shadow-medium transition-all animate-fade-in">
-              <CardHeader>
-                <div className="w-14 h-14 bg-gradient-secondary rounded-xl flex items-center justify-center mb-4">
-                  <Sparkles className="w-7 h-7 text-white" />
-                </div>
-                <CardTitle>Deep Research Content</CardTitle>
-                <CardDescription>
-                  Enter a custom keyword and platform for targeted content
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="keyword">Keyword or Topic</Label>
-                  <Input
-                    id="keyword"
-                    placeholder="e.g., AI Marketing"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="platform">Platform</Label>
-                  <Select value={platform} onValueChange={setPlatform}>
-                    <SelectTrigger id="platform">
-                      <SelectValue placeholder="Choose platform" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="facebook">Facebook</SelectItem>
-                      <SelectItem value="linkedin">LinkedIn</SelectItem>
-                      <SelectItem value="x">X (Twitter)</SelectItem>
-                      <SelectItem value="instagram">Instagram</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="email"
-                    checked={emailMe}
-                    onCheckedChange={(checked) => setEmailMe(checked as boolean)}
-                  />
-                  <label
-                    htmlFor="email"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Email me this content
-                  </label>
-                </div>
-
-                <Button
-                  onClick={handleDeepResearch}
-                  disabled={isGenerating}
-                  className="w-full"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <TrendingUp className="w-5 h-5" />
-                      Generate Content
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Results Section */}
-          {contentGenerated && !isGenerating && (
-            <div className="space-y-8 animate-scale-in">
-              <Card className="shadow-medium border-2 border-primary/20">
-                <CardHeader>
-                  <CardTitle>Generated Content</CardTitle>
-                  <CardDescription>
-                    AI-powered posts ready to publish or customize
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {generatedPosts.map((post, index) => (
-                    <Card key={index} className="shadow-soft">
-                      <CardContent className="pt-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="px-3 py-1 bg-gradient-primary text-white text-xs font-semibold rounded-full">
-                              {post.platform}
-                            </span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => copyToClipboard(post.content)}
-                            >
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <p className="text-sm text-foreground">{post.content}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {emailMe && (
-                <Card className="shadow-soft bg-accent/50 border-primary/20 animate-fade-in">
-                  <CardContent className="py-6">
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-primary" />
-                      <p className="text-sm font-medium">
-                        Content has been sent to your email address
-                      </p>
+                  <CardHeader>
+                    <div className={`w-12 h-12 rounded-lg bg-background flex items-center justify-center mb-3 ${platform.color}`}>
+                      <Icon className="w-6 h-6" />
                     </div>
-                  </CardContent>
+                    <CardTitle className="text-xl">{platform.name}</CardTitle>
+                    <CardDescription className="text-sm line-clamp-3">
+                      {platform.description}
+                    </CardDescription>
+                  </CardHeader>
                 </Card>
-              )}
-            </div>
-          )}
-
-          {/* Recent Trends Section */}
-          <Card className="mt-12 shadow-soft animate-fade-in">
-            <CardHeader>
-              <CardTitle>Recent Trending Topics</CardTitle>
-              <CardDescription>
-                Popular topics our AI has identified recently
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-3">
-                {recentTrends.map((trend, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setKeyword(trend)}
-                    className="px-4 py-2 bg-secondary hover:bg-primary hover:text-primary-foreground rounded-full text-sm font-medium transition-colors"
-                  >
-                    {trend}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
