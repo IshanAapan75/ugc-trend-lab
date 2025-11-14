@@ -114,7 +114,7 @@ const ContentIntelligence = () => {
     setIsGenerating(true);
 
     try {
-      const response = await fetch("https://n8n.welz.in/webhook-test/social media content intelligence", {
+      const response = await fetch("https://n8n.welz.in/webhook-test/social", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
