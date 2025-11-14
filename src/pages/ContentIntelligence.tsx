@@ -113,15 +113,40 @@ const ContentIntelligence = () => {
 
     setIsGenerating(true);
 
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      setGeneratedContent(`This is a sample ${selectedPlatform?.name.toLowerCase()} about "${topic}".\n\n${outline}\n\nThis is AI-generated content that would appear here after processing your request.`);
-      setIsGenerating(false);
+    try {
+      const response = await fetch("https://n8n.welz.in/webhook-test/social media content intelligence", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          platform: selectedPlatform?.id,
+          topic: topic,
+          outline: outline,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate content");
+      }
+
+      const data = await response.json();
+      setGeneratedContent(data.content || "Content generated successfully!");
+      
       toast({
         title: "Content Generated!",
         description: "Your AI-powered content is ready",
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate content. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error generating content:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyToClipboard = () => {
