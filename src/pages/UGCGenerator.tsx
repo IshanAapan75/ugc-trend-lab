@@ -79,7 +79,7 @@ const UGCGenerator = () => {
       formData.append('productName', productName);
       formData.append('description', description);
       
-      const response = await fetch('https://n8n.welz.in/webhook-test/ugc-upload', {
+      const response = await fetch('https://n8n.welz.in/webhook/ugc-upload', {
         method: 'POST',
         body: formData
       });
